@@ -10,7 +10,6 @@ import { usePlayer, usePlayerSessions, usePlayerAvgScore } from '@/hooks/useSupa
 import { getLetterGrade, getGradeColor, getPlayerTier, getTierBadgeStyle } from '@/lib/gradeUtils';
 import { supabase } from '@/integrations/supabase/client';
 import ScoutReportDialog from '@/components/ScoutReportDialog';
-import PlayerTrainingScore from '@/components/PlayerTrainingScore';
 
 const PlayerProfile = () => {
   const { playerId } = useParams();
@@ -19,7 +18,6 @@ const PlayerProfile = () => {
   const [scoutReportOpen, setScoutReportOpen] = useState(false);
   const [monthlyAttempts, setMonthlyAttempts] = useState(0);
   const [shotTotals, setShotTotals] = useState({ attempts: 0, made: 0 });
-  const [courtIQStats, setCourtIQStats] = useState({ totalPoints: 0, totalAnswered: 0, totalCorrect: 0, currentStreak: 0 });
   const id = auth.role === 'player' ? auth.playerId! : playerId!;
   const { player, loading: playerLoading } = usePlayer(id);
   const { sessions, loading: sessionsLoading } = usePlayerSessions(id);
@@ -33,21 +31,10 @@ const PlayerProfile = () => {
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
       const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
 
-      const [{ data: shotSessions }, { data: courtiqData }] = await Promise.all([
-        supabase.from('shot_sessions').select('id, date').eq('player_id', id),
-        supabase
-          .from('courtiq_player_stats')
-          .select('total_points, total_answered, total_correct, current_streak')
-          .eq('player_id', id)
-          .maybeSingle(),
-      ]);
-
-      setCourtIQStats({
-        totalPoints: courtiqData?.total_points ?? 0,
-        totalAnswered: courtiqData?.total_answered ?? 0,
-        totalCorrect: courtiqData?.total_correct ?? 0,
-        currentStreak: courtiqData?.current_streak ?? 0,
-      });
+      const { data: shotSessions } = await supabase
+        .from('shot_sessions')
+        .select('id, date')
+        .eq('player_id', id);
 
       if (!shotSessions || shotSessions.length === 0) {
         setMonthlyAttempts(0);
@@ -113,10 +100,6 @@ const PlayerProfile = () => {
     ריבאונדים: s.rebounds,
     איבודים: s.turnovers,
   }));
-
-  const courtIQAccuracy = courtIQStats.totalAnswered > 0
-    ? Math.round((courtIQStats.totalCorrect / courtIQStats.totalAnswered) * 100)
-    : 0;
 
   return (
     <div className="min-h-screen px-4 pb-4 md:px-8 md:pb-8">
@@ -192,8 +175,6 @@ const PlayerProfile = () => {
             ))}
           </div>
         )}
-
-        <PlayerTrainingScore playerId={id} isCoach={auth.role === 'coach'} />
 
         {!isBasicPlan && sessions.length > 1 && (
           <div className="grid gap-4 mb-6 md:grid-cols-2">

@@ -236,13 +236,11 @@ const ScoutReportDialog = ({
           { data: ratings },
           { data: sessions },
           { data: shotSessions },
-          { data: courtiqStats },
         ] = await Promise.all([
           supabase.from('player_goals').select('*').eq('player_id', playerId).order('created_at', { ascending: false }),
           supabase.from('player_ratings').select('*').eq('player_id', playerId).order('period_end', { ascending: false }).limit(1),
           supabase.from('sessions').select('*').eq('player_id', playerId),
           supabase.from('shot_sessions').select('id, date').eq('player_id', playerId),
-          supabase.from('courtiq_player_stats').select('*').eq('player_id', playerId).maybeSingle(),
         ]);
 
         let totalAttempts = 0, totalMade = 0;
@@ -289,12 +287,8 @@ const ScoutReportDialog = ({
         ];
 
         const recs = ['', '', ''];
-        if (courtiqStats) {
-          const accuracy = courtiqStats.total_answered ? Math.round((courtiqStats.total_correct! / courtiqStats.total_answered) * 100) : 0;
-          recs[0] = `Court IQ: ${courtiqStats.total_points} pts, ${accuracy}% accuracy, streak ${courtiqStats.current_streak}`;
-        }
         if (totalAttempts > 0) {
-          recs[1] = `Shot Tracker: ${totalAttempts} attempts, ${totalMade} made (${shootingPct}%)`;
+          recs[0] = `Shot Tracker: ${totalAttempts} attempts, ${totalMade} made (${shootingPct}%)`;
         }
 
         const prefilled = createEmptyData(playerName, playerPosition, playerAge, avatarUrl);
