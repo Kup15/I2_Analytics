@@ -6,6 +6,7 @@ import { ArrowRight, Plus, Target, FileText, Clock } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import PlayerRatings from '@/components/PlayerRatings';
 import TeamCoachFeedbackSection from '@/components/TeamCoachFeedbackSection';
+import PlayerGamesSection from '@/components/PlayerGamesSection';
 import { usePlayer, usePlayerSessions, usePlayerAvgScore } from '@/hooks/useSupabaseData';
 import { getLetterGrade, getGradeColor, getPlayerTier, getTierBadgeStyle } from '@/lib/gradeUtils';
 import { supabase } from '@/integrations/supabase/client';
@@ -122,9 +123,9 @@ const PlayerProfile = () => {
                     <FileText className="ml-2 h-4 w-4" />
                     דוח סקאוט
                   </Button>
-                  <Button onClick={() => navigate(`/player/${id}/new-session`)} className="gradient-accent text-accent-foreground">
+                  <Button onClick={() => navigate(`/player/${id}/new-game`)} className="gradient-accent text-accent-foreground">
                     <Plus className="ml-2 h-4 w-4" />
-                    סשן חדש
+                    משחק חדש
                   </Button>
                 </>
               )}
@@ -207,6 +208,8 @@ const PlayerProfile = () => {
             </div>
           </div>
         )}
+
+        <PlayerGamesSection playerId={id} canCreate={auth.role === 'coach' && !isBasicPlan} />
 
         {!isBasicPlan && (
           <div className="mb-6">

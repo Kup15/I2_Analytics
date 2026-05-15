@@ -8,6 +8,8 @@ import LandingPage from "./pages/LandingPage";
 import PendingApproval from "./pages/PendingApproval";
 import PlayerProfile from "./pages/PlayerProfile";
 import RosterPage from "./pages/RosterPage";
+import NewGamePage from "./pages/NewGamePage";
+import GameTaggingPage from "./pages/GameTaggingPage";
 import NotFound from "./pages/NotFound";
 import BasicPlayerNav from "./components/BasicPlayerNav";
 import RoleSwitcher from "./components/RoleSwitcher";
@@ -76,12 +78,15 @@ const AppRoutes = () => {
           <>
             <Route path="/" element={<CoachWrap><RosterPage /></CoachWrap>} />
             <Route path="/player/:playerId" element={<CoachWrap><PlayerProfile /></CoachWrap>} />
+            <Route path="/player/:playerId/new-game" element={<CoachWrap><NewGamePage /></CoachWrap>} />
+            <Route path="/game/:gameId" element={<CoachWrap><GameTaggingPage /></CoachWrap>} />
             <Route path="/accessibility" element={<CoachWrap><AccessibilityPage /></CoachWrap>} />
             <Route path="*" element={<CoachWrap><NotFound /></CoachWrap>} />
           </>
         ) : (
           <>
             <Route path="/" element={<PlayerNavWrap><PlayerProfile /></PlayerNavWrap>} />
+            <Route path="/game/:gameId" element={<PlayerNavWrap><GameTaggingPage /></PlayerNavWrap>} />
             <Route path="/accessibility" element={<PlayerNavWrap><AccessibilityPage /></PlayerNavWrap>} />
             <Route path="*" element={<PlayerNavWrap><PlayerProfile /></PlayerNavWrap>} />
           </>
