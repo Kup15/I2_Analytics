@@ -2,15 +2,10 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Plus, Video, Target, Brain, FileText, Clock } from 'lucide-react';
+import { ArrowRight, Plus, Target, FileText, Clock } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import ScheduleMeetingDialog from '@/components/ScheduleMeetingDialog';
-import NotificationBell from '@/components/NotificationBell';
-import UpcomingMeetings from '@/components/UpcomingMeetings';
 import PlayerRatings from '@/components/PlayerRatings';
-import PlayerGoals from '@/components/PlayerGoals';
 import TeamCoachFeedbackSection from '@/components/TeamCoachFeedbackSection';
-import TechniqueVideos from '@/components/TechniqueVideos';
 import { usePlayer, usePlayerSessions, usePlayerAvgScore } from '@/hooks/useSupabaseData';
 import { getLetterGrade, getGradeColor, getPlayerTier, getTierBadgeStyle } from '@/lib/gradeUtils';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,7 +16,6 @@ const PlayerProfile = () => {
   const { playerId } = useParams();
   const { auth } = useAuth();
   const navigate = useNavigate();
-  const [meetingOpen, setMeetingOpen] = useState(false);
   const [scoutReportOpen, setScoutReportOpen] = useState(false);
   const [monthlyAttempts, setMonthlyAttempts] = useState(0);
   const [shotTotals, setShotTotals] = useState({ attempts: 0, made: 0 });
@@ -145,10 +139,6 @@ const PlayerProfile = () => {
                     <FileText className="ml-2 h-4 w-4" />
                     דוח סקאוט
                   </Button>
-                  <Button variant="outline" onClick={() => setMeetingOpen(true)} className="text-muted-foreground">
-                    <Video className="ml-2 h-4 w-4" />
-                    תזמן פגישה
-                  </Button>
                   <Button onClick={() => navigate(`/player/${id}/new-session`)} className="gradient-accent text-accent-foreground">
                     <Plus className="ml-2 h-4 w-4" />
                     סשן חדש
@@ -157,11 +147,7 @@ const PlayerProfile = () => {
               )}
             </div>
           </div>
-        ) : (
-          <div className="mb-4 flex items-center justify-end">
-            <NotificationBell />
-          </div>
-        )}
+        ) : null}
 
         <div className="gradient-card mb-6 rounded-xl p-4 sm:p-6 animate-fade-in">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -190,8 +176,6 @@ const PlayerProfile = () => {
             </div>
           </div>
         </div>
-
-        {!isBasicPlan && <UpcomingMeetings playerId={id} />}
 
         {!isBasicPlan && (
           <div className="grid grid-cols-2 gap-4 mb-6 md:grid-cols-4">
@@ -244,15 +228,8 @@ const PlayerProfile = () => {
         )}
 
         {!isBasicPlan && (
-          <div className="grid gap-4 mb-6 md:grid-cols-2">
-            <PlayerGoals playerId={id} isCoach={auth.role === 'coach'} />
-            <PlayerRatings playerId={id} isCoach={auth.role === 'coach'} />
-          </div>
-        )}
-
-        {!isBasicPlan && (
           <div className="mb-6">
-            <TechniqueVideos playerId={id} isOwnProfile={auth.role === 'player'} />
+            <PlayerRatings playerId={id} isCoach={auth.role === 'coach'} />
           </div>
         )}
 
@@ -331,22 +308,17 @@ const PlayerProfile = () => {
           </div>
         )}
 
-        {auth.role === 'coach' && (
-          <>
-            <ScheduleMeetingDialog open={meetingOpen} onOpenChange={setMeetingOpen} playerId={id} playerName={player.display_name} />
-            {!isBasicPlan && (
-              <ScoutReportDialog
-                open={scoutReportOpen}
-                onOpenChange={setScoutReportOpen}
-                playerId={id}
-                playerName={player.display_name}
-                playerPosition={player.position || ''}
-                playerAge={player.age || 0}
-                playerTeam={player.team || ''}
-                avatarUrl={(player as any).avatar_url}
-              />
-            )}
-          </>
+        {auth.role === 'coach' && !isBasicPlan && (
+          <ScoutReportDialog
+            open={scoutReportOpen}
+            onOpenChange={setScoutReportOpen}
+            playerId={id}
+            playerName={player.display_name}
+            playerPosition={player.position || ''}
+            playerAge={player.age || 0}
+            playerTeam={player.team || ''}
+            avatarUrl={(player as any).avatar_url}
+          />
         )}
       </div>
     </div>
