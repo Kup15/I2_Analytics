@@ -18,6 +18,7 @@ export interface GameTag {
   game_id: string;
   quarter: number;
   minute: number;
+  second: number;
   video_timestamp_seconds: number | null;
   score: number;
   type: string;
@@ -28,6 +29,7 @@ export interface GameTag {
 export interface GameTagInput {
   quarter: number;
   minute: number;
+  second: number;
   video_timestamp_seconds: number | null;
   score: number;
   type: string;

@@ -19,6 +19,8 @@ const formatTimestamp = (s: number | null): string => {
   return `${m}:${String(sec).padStart(2, '0')}`;
 };
 
+const formatGameClock = (m: number, s: number): string => `${m}:${String(s).padStart(2, '0')}`;
+
 const GameTaggingPage = () => {
   const { gameId } = useParams();
   const navigate = useNavigate();
@@ -28,6 +30,7 @@ const GameTaggingPage = () => {
 
   const [quarter, setQuarter] = useState(1);
   const [minute, setMinute] = useState(0);
+  const [second, setSecond] = useState(0);
   const [pendingType, setPendingType] = useState<string | null>(null);
   const playerRef = useRef<YouTubePlayerHandle>(null);
 
@@ -42,12 +45,18 @@ const GameTaggingPage = () => {
     const def = TAG_TYPES_BY_VALUE[typeValue];
     if (!def) return;
 
+    if (minute === 0 && second === 0) {
+      toast.error('יש להגדיר את הזמן ברבע לפני תיוג');
+      return;
+    }
+
     const ts = videoId ? playerRef.current?.getCurrentTime() ?? null : null;
     const score = scoreOverride ?? def.defaultScore;
 
     const res = await addTag(gameId, {
       quarter,
       minute,
+      second,
       video_timestamp_seconds: ts,
       score,
       type: typeValue,
@@ -153,7 +162,7 @@ const GameTaggingPage = () => {
           </div>
         </div>
 
-        {/* Quarter/minute selectors */}
+        {/* Quarter / clock selectors */}
         {isCoach && !isClosed && (
           <div className="mb-3 grid grid-cols-2 gap-3">
             <div>
@@ -173,15 +182,32 @@ const GameTaggingPage = () => {
               </div>
             </div>
             <div>
-              <Label htmlFor="minute" className="text-xs">דקה</Label>
-              <Input
-                id="minute"
-                type="number"
-                min={0}
-                max={15}
-                value={minute}
-                onChange={(e) => setMinute(Math.max(0, Math.min(15, Number(e.target.value) || 0)))}
-              />
+              <Label className="text-xs">שעון רבע (MM:SS)</Label>
+              <div className="flex items-center gap-1">
+                <Input
+                  id="minute"
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  max={15}
+                  value={minute}
+                  onChange={(e) => setMinute(Math.max(0, Math.min(15, Number(e.target.value) || 0)))}
+                  className="text-center"
+                  aria-label="דקה ברבע"
+                />
+                <span className="font-bold text-muted-foreground">:</span>
+                <Input
+                  id="second"
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  max={59}
+                  value={String(second).padStart(2, '0')}
+                  onChange={(e) => setSecond(Math.max(0, Math.min(59, Number(e.target.value) || 0)))}
+                  className="text-center"
+                  aria-label="שניות ברבע"
+                />
+              </div>
             </div>
           </div>
         )}
@@ -282,8 +308,8 @@ const GameTaggingPage = () => {
                         )}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        רבע {tag.quarter} · דקה {tag.minute}
-                        {tag.video_timestamp_seconds != null && ` · ${formatTimestamp(tag.video_timestamp_seconds)}`}
+                        רבע {tag.quarter} · {formatGameClock(tag.minute, tag.second ?? 0)}
+                        {tag.video_timestamp_seconds != null && ` · וידאו ${formatTimestamp(tag.video_timestamp_seconds)}`}
                       </div>
                     </button>
                   </li>

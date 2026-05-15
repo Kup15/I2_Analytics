@@ -390,6 +390,7 @@ export type Database = {
           minute: number
           quarter: number
           score: number
+          second: number
           type: string
           video_timestamp_seconds: number | null
         }
@@ -401,6 +402,7 @@ export type Database = {
           minute: number
           quarter: number
           score?: number
+          second?: number
           type: string
           video_timestamp_seconds?: number | null
         }
@@ -412,6 +414,7 @@ export type Database = {
           minute?: number
           quarter?: number
           score?: number
+          second?: number
           type?: string
           video_timestamp_seconds?: number | null
         }
