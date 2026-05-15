@@ -88,6 +88,14 @@ export async function deleteTag(tagId: string): Promise<{ error?: string }> {
   return error ? { error: error.message } : {};
 }
 
+export async function updateTagDescription(tagId: string, description: string): Promise<{ error?: string }> {
+  const { error } = await supabase
+    .from('game_tags')
+    .update({ description })
+    .eq('id', tagId);
+  return error ? { error: error.message } : {};
+}
+
 export async function closeGame(gameId: string): Promise<{ error?: string }> {
   const { error } = await supabase.from('games').update({ status: 'closed' }).eq('id', gameId);
   return error ? { error: error.message } : {};

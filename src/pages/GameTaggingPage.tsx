@@ -1,11 +1,12 @@
 import { useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Lock, Trash2 } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Lock, MessageSquarePlus, Pencil, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
-import { addTag, closeGame, deleteTag, useGame } from '@/hooks/useGames';
+import { addTag, closeGame, deleteTag, updateTagDescription, useGame } from '@/hooks/useGames';
 import { GROUP_META, TAG_TYPES_BY_GROUP, TAG_TYPES_BY_VALUE, type TagGroup } from '@/lib/games-types';
 import { usePlayer } from '@/hooks/useSupabaseData';
 import YouTubePlayer, { YouTubePlayerHandle, extractYouTubeId } from '@/components/YouTubePlayer';
@@ -32,6 +33,9 @@ const GameTaggingPage = () => {
   const [minute, setMinute] = useState(0);
   const [second, setSecond] = useState(0);
   const [pendingType, setPendingType] = useState<string | null>(null);
+  const [editingTagId, setEditingTagId] = useState<string | null>(null);
+  const [descriptionDraft, setDescriptionDraft] = useState('');
+  const [savingDescription, setSavingDescription] = useState(false);
   const playerRef = useRef<YouTubePlayerHandle>(null);
 
   const isCoach = role === 'coach' && user?.id === game?.coach_id;
@@ -79,6 +83,28 @@ const GameTaggingPage = () => {
   const handleDelete = async (tagId: string) => {
     const res = await deleteTag(tagId);
     if (res.error) toast.error(`שגיאה במחיקה: ${res.error}`);
+  };
+
+  const handleStartEditDescription = (tagId: string, currentDescription: string) => {
+    setEditingTagId(tagId);
+    setDescriptionDraft(currentDescription);
+  };
+
+  const handleCancelEditDescription = () => {
+    setEditingTagId(null);
+    setDescriptionDraft('');
+  };
+
+  const handleSaveDescription = async (tagId: string) => {
+    setSavingDescription(true);
+    const res = await updateTagDescription(tagId, descriptionDraft.trim());
+    setSavingDescription(false);
+    if (res.error) {
+      toast.error(`שגיאה בשמירה: ${res.error}`);
+      return;
+    }
+    setEditingTagId(null);
+    setDescriptionDraft('');
   };
 
   const handleUndo = async () => {
@@ -277,41 +303,100 @@ const GameTaggingPage = () => {
                 const def = TAG_TYPES_BY_VALUE[tag.type];
                 const meta = def ? GROUP_META[def.group] : null;
                 const seekable = videoId && tag.video_timestamp_seconds != null;
+                const isEditing = editingTagId === tag.id;
+                const canEdit = isCoach && !isClosed;
+                const hasDescription = tag.description && tag.description.trim().length > 0;
                 return (
-                  <li key={tag.id} className="flex items-center justify-between gap-2 py-2">
-                    <div className="flex items-center gap-2">
-                      {isCoach && !isClosed && (
-                        <button
-                          onClick={() => handleDelete(tag.id)}
-                          className="text-muted-foreground hover:text-destructive p-1"
-                          title="מחק"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      )}
-                      <span className={`inline-block w-2 h-2 rounded-full ${meta?.dotClass ?? 'bg-muted'}`} />
-                      <span className={`font-bold ${tag.score > 0 ? 'text-emerald-500' : tag.score < 0 ? 'text-red-500' : 'text-muted-foreground'}`}>
-                        {tag.score > 0 ? `+${tag.score}` : tag.score}
-                      </span>
+                  <li key={tag.id} className="py-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        {canEdit && (
+                          <button
+                            onClick={() => handleDelete(tag.id)}
+                            className="text-muted-foreground hover:text-destructive p-1"
+                            title="מחק"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
+                        <span className={`inline-block w-2 h-2 rounded-full ${meta?.dotClass ?? 'bg-muted'}`} />
+                        <span className={`font-bold ${tag.score > 0 ? 'text-emerald-500' : tag.score < 0 ? 'text-red-500' : 'text-muted-foreground'}`}>
+                          {tag.score > 0 ? `+${tag.score}` : tag.score}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => handleSeek(tag.video_timestamp_seconds)}
+                        disabled={!seekable}
+                        className={`flex-1 text-right ${seekable ? 'cursor-pointer hover:bg-muted rounded-lg px-2 py-1' : 'cursor-default'}`}
+                      >
+                        <div className="text-sm font-medium flex items-center gap-2 justify-end">
+                          <span>{def?.description ?? tag.type}</span>
+                          {def && (
+                            <span className={`inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] font-bold ${meta?.chipClass}`}>
+                              {def.code}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          רבע {tag.quarter} · {formatGameClock(tag.minute, tag.second ?? 0)}
+                          {tag.video_timestamp_seconds != null && ` · וידאו ${formatTimestamp(tag.video_timestamp_seconds)}`}
+                        </div>
+                      </button>
                     </div>
-                    <button
-                      onClick={() => handleSeek(tag.video_timestamp_seconds)}
-                      disabled={!seekable}
-                      className={`flex-1 text-right ${seekable ? 'cursor-pointer hover:bg-muted rounded-lg px-2 py-1' : 'cursor-default'}`}
-                    >
-                      <div className="text-sm font-medium flex items-center gap-2 justify-end">
-                        <span>{def?.description ?? tag.type}</span>
-                        {def && (
-                          <span className={`inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] font-bold ${meta?.chipClass}`}>
-                            {def.code}
-                          </span>
+
+                    {/* Description: editor when editing, text + edit affordance otherwise */}
+                    {isEditing ? (
+                      <div className="mt-2 space-y-2">
+                        <Textarea
+                          value={descriptionDraft}
+                          onChange={(e) => setDescriptionDraft(e.target.value)}
+                          placeholder="מה קרה? מה היה טוב או רע?"
+                          rows={3}
+                          autoFocus
+                          maxLength={500}
+                        />
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={handleCancelEditDescription}
+                            disabled={savingDescription}
+                          >
+                            <X className="ml-1 h-4 w-4" />
+                            בטל
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleSaveDescription(tag.id)}
+                            disabled={savingDescription}
+                            className="gradient-accent text-accent-foreground"
+                          >
+                            {savingDescription ? 'שומר...' : 'שמור'}
+                          </Button>
+                        </div>
+                      </div>
+                    ) : hasDescription ? (
+                      <div className="mt-2 flex items-start gap-2 rounded-lg bg-secondary/50 p-2">
+                        <p className="flex-1 text-right text-sm text-foreground whitespace-pre-wrap">{tag.description}</p>
+                        {canEdit && (
+                          <button
+                            onClick={() => handleStartEditDescription(tag.id, tag.description)}
+                            className="text-muted-foreground hover:text-accent p-1"
+                            title="ערוך תיאור"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
                         )}
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        רבע {tag.quarter} · {formatGameClock(tag.minute, tag.second ?? 0)}
-                        {tag.video_timestamp_seconds != null && ` · וידאו ${formatTimestamp(tag.video_timestamp_seconds)}`}
-                      </div>
-                    </button>
+                    ) : canEdit ? (
+                      <button
+                        onClick={() => handleStartEditDescription(tag.id, '')}
+                        className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-accent"
+                      >
+                        <MessageSquarePlus className="h-3.5 w-3.5" />
+                        הוסף תיאור
+                      </button>
+                    ) : null}
                   </li>
                 );
               })}
