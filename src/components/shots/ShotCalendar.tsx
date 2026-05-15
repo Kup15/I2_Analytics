@@ -1,0 +1,219 @@
+import { useState, useMemo } from 'react';
+import { Calendar } from '@/components/ui/calendar';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Plus, CalendarDays, Pencil, Trash2, Check, X } from 'lucide-react';
+import { format } from 'date-fns';
+import { he } from 'date-fns/locale';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import NewTrainingWizard from '@/components/shots/NewTrainingWizard';
+
+interface ShotSession {
+  id: string;
+  title: string;
+  date: string;
+  video_url: string | null;
+}
+
+interface ShotCalendarProps {
+  sessions: ShotSession[];
+  activeSessionId: string | null;
+  onSelectSession: (id: string) => void;
+  onSessionCreated: () => void;
+  onDateSelect?: (dateKey: string) => void;
+  playerId: string;
+  coachId?: string;
+  canCreate: boolean;
+}
+
+const ShotCalendar = ({
+  sessions,
+  activeSessionId,
+  onSelectSession,
+  onSessionCreated,
+  onDateSelect,
+  playerId,
+  coachId,
+  canCreate,
+}: ShotCalendarProps) => {
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+
+  const handleEdit = (s: ShotSession) => {
+    setEditingId(s.id);
+    setEditTitle(s.title);
+  };
+
+  const handleSaveEdit = async (id: string) => {
+    if (!editTitle.trim()) return;
+    const { error } = await supabase.from('shot_sessions').update({ title: editTitle.trim() }).eq('id', id);
+    if (error) { toast.error('שגיאה בעדכון'); return; }
+    toast.success('האימון עודכן');
+    setEditingId(null);
+    onSessionCreated();
+  };
+
+  const handleDelete = async (s: ShotSession) => {
+    if (!confirm(`למחוק את האימון "${s.title}"? כל הנתונים יימחקו.`)) return;
+    // Delete shots first, then session
+    await supabase.from('shots').delete().eq('session_id', s.id);
+    const { error } = await supabase.from('shot_sessions').delete().eq('id', s.id);
+    if (error) { toast.error('שגיאה במחיקה'); return; }
+    toast.success('האימון נמחק');
+    onSessionCreated();
+  };
+
+  const handleDateChange = (date: Date | undefined) => {
+    setSelectedDate(date);
+    if (date && onDateSelect) {
+      onDateSelect(format(date, 'yyyy-MM-dd'));
+    }
+  };
+
+  const sessionsByDate = useMemo(() => {
+    const map: Record<string, ShotSession[]> = {};
+    sessions.forEach(s => {
+      const dateKey = s.date.split('T')[0];
+      if (!map[dateKey]) map[dateKey] = [];
+      map[dateKey].push(s);
+    });
+    return map;
+  }, [sessions]);
+
+  const datesWithSessions = useMemo(() => {
+    return sessions.map(s => new Date(s.date));
+  }, [sessions]);
+
+  const selectedDateKey = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '';
+  const sessionsForDate = selectedDateKey ? (sessionsByDate[selectedDateKey] || []) : [];
+
+  const isRetroAllowed = (date: Date): boolean => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const selected = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    if (selected > today) return false;
+    if (selected.getTime() === today.getTime()) return true;
+    if (now.getFullYear() === 2026 && now.getMonth() === 2) {
+      return selected.getFullYear() === 2026 && selected.getMonth() === 2;
+    }
+    return false;
+  };
+
+  const handleSessionCreated = (sessionId: string) => {
+    onSessionCreated();
+    onSelectSession(sessionId);
+  };
+
+  return (
+    <div className="gradient-card rounded-xl p-3 sm:p-4 space-y-4">
+      <div className="flex items-center justify-end gap-2">
+        <h3 className="font-semibold text-foreground">לוח אימונים</h3>
+        <CalendarDays className="h-5 w-5 text-accent" />
+      </div>
+
+      <div className="flex justify-center">
+        <Calendar
+          mode="single"
+          selected={selectedDate}
+          onSelect={handleDateChange}
+          locale={he}
+          modifiers={{
+            hasSessions: datesWithSessions,
+          }}
+          modifiersClassNames={{
+            hasSessions: 'bg-accent/30 font-bold text-accent-foreground',
+          }}
+          className="rounded-lg border border-border"
+        />
+      </div>
+
+      {selectedDate && (
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground text-right font-medium">
+            {format(selectedDate, 'dd/MM/yyyy', { locale: he })}
+          </p>
+
+          {sessionsForDate.length > 0 ? (
+            <div className="space-y-2">
+              {sessionsForDate.map(s => (
+                <div key={s.id} className="flex items-center gap-1.5">
+                  {editingId === s.id ? (
+                    <div className="flex items-center gap-1.5 w-full">
+                      <button onClick={() => setEditingId(null)} className="text-muted-foreground hover:text-destructive p-1">
+                        <X className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => handleSaveEdit(s.id)} className="text-success p-1">
+                        <Check className="h-4 w-4" />
+                      </button>
+                      <Input
+                        value={editTitle}
+                        onChange={e => setEditTitle(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && handleSaveEdit(s.id)}
+                        className="flex-1 h-9 text-right text-sm bg-secondary border-border"
+                        autoFocus
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => handleDelete(s)}
+                        className="text-muted-foreground hover:text-destructive p-1.5 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleEdit(s)}
+                        className="text-muted-foreground hover:text-accent p-1.5 rounded-lg transition-colors"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => onSelectSession(s.id)}
+                        className={`flex-1 rounded-xl p-3.5 text-right text-sm font-medium transition-all active:scale-[0.97] ${
+                          s.id === activeSessionId
+                            ? 'gradient-accent text-accent-foreground shadow-md'
+                            : 'bg-secondary text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        {s.title || 'אימון'}
+                        {s.video_url && <span className="mr-2 text-xs">🎥</span>}
+                      </button>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground text-center py-2">אין אימונים בתאריך זה</p>
+          )}
+
+          {canCreate && selectedDate && isRetroAllowed(selectedDate) && (
+            <Button
+              onClick={() => setWizardOpen(true)}
+              className="w-full gradient-accent text-accent-foreground h-12 rounded-xl text-sm font-bold active:scale-[0.97] transition-transform"
+            >
+              <Plus className="ml-1.5 h-4 w-4" />
+              הוסף אימון חדש
+            </Button>
+          )}
+        </div>
+      )}
+
+      {selectedDate && (
+        <NewTrainingWizard
+          open={wizardOpen}
+          onOpenChange={setWizardOpen}
+          playerId={playerId}
+          coachId={coachId}
+          selectedDate={selectedDate}
+          onSessionCreated={handleSessionCreated}
+        />
+      )}
+    </div>
+  );
+};
+
+export default ShotCalendar;
