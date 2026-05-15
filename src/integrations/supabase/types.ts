@@ -381,6 +381,89 @@ export type Database = {
           },
         ]
       }
+      game_tags: {
+        Row: {
+          created_at: string
+          description: string
+          game_id: string
+          id: string
+          minute: number
+          quarter: number
+          score: number
+          type: string
+          video_timestamp_seconds: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          game_id: string
+          id?: string
+          minute: number
+          quarter: number
+          score?: number
+          type: string
+          video_timestamp_seconds?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          game_id?: string
+          id?: string
+          minute?: number
+          quarter?: number
+          score?: number
+          type?: string
+          video_timestamp_seconds?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_tags_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      games: {
+        Row: {
+          coach_id: string
+          created_at: string
+          date: string
+          id: string
+          notes: string
+          opponent: string
+          player_id: string
+          status: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          coach_id: string
+          created_at?: string
+          date: string
+          id?: string
+          notes?: string
+          opponent: string
+          player_id: string
+          status?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          coach_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          notes?: string
+          opponent?: string
+          player_id?: string
+          status?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
