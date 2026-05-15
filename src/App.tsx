@@ -7,12 +7,9 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import LandingPage from "./pages/LandingPage";
 import PendingApproval from "./pages/PendingApproval";
 import PlayerProfile from "./pages/PlayerProfile";
+import RosterPage from "./pages/RosterPage";
 import NotFound from "./pages/NotFound";
 import BasicPlayerNav from "./components/BasicPlayerNav";
-import CourtIQPage from "./pages/CourtIQPage";
-import CourtIQLeaderboardPage from "./pages/CourtIQLeaderboardPage";
-import CourtIQProfilePage from "./pages/CourtIQProfilePage";
-import CourtIQAdminPage from "./pages/CourtIQAdminPage";
 import RoleSwitcher from "./components/RoleSwitcher";
 import FloatingLogo from "./components/FloatingLogo";
 import MobileTopBar from "./components/MobileTopBar";
@@ -29,7 +26,7 @@ const AppRoutes = () => {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl gradient-accent animate-pulse">
-            <span className="text-2xl font-black text-accent-foreground">IQ</span>
+            <span className="text-2xl font-black text-accent-foreground">I2</span>
           </div>
           <p className="text-muted-foreground">טוען...</p>
         </div>
@@ -77,23 +74,16 @@ const AppRoutes = () => {
       <Routes>
         {isCoach ? (
           <>
-            <Route path="/" element={<CoachWrap><CourtIQPage /></CoachWrap>} />
-            <Route path="/courtiq" element={<CoachWrap><CourtIQPage /></CoachWrap>} />
-            <Route path="/courtiq/leaderboard" element={<CoachWrap><CourtIQLeaderboardPage /></CoachWrap>} />
-            <Route path="/courtiq/profile" element={<CoachWrap><CourtIQProfilePage /></CoachWrap>} />
-            <Route path="/courtiq/admin" element={<CoachWrap><CourtIQAdminPage /></CoachWrap>} />
+            <Route path="/" element={<CoachWrap><RosterPage /></CoachWrap>} />
             <Route path="/player/:playerId" element={<CoachWrap><PlayerProfile /></CoachWrap>} />
             <Route path="/accessibility" element={<CoachWrap><AccessibilityPage /></CoachWrap>} />
             <Route path="*" element={<CoachWrap><NotFound /></CoachWrap>} />
           </>
         ) : (
           <>
-            <Route path="/" element={<PlayerNavWrap><CourtIQPage /></PlayerNavWrap>} />
-            <Route path="/courtiq" element={<PlayerNavWrap><CourtIQPage /></PlayerNavWrap>} />
-            <Route path="/courtiq/leaderboard" element={<PlayerNavWrap><CourtIQLeaderboardPage /></PlayerNavWrap>} />
-            <Route path="/courtiq/profile" element={<PlayerNavWrap><CourtIQProfilePage /></PlayerNavWrap>} />
+            <Route path="/" element={<PlayerNavWrap><PlayerProfile /></PlayerNavWrap>} />
             <Route path="/accessibility" element={<PlayerNavWrap><AccessibilityPage /></PlayerNavWrap>} />
-            <Route path="*" element={<PlayerNavWrap><CourtIQPage /></PlayerNavWrap>} />
+            <Route path="*" element={<PlayerNavWrap><PlayerProfile /></PlayerNavWrap>} />
           </>
         )}
       </Routes>

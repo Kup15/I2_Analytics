@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Trophy, LogOut, Brain, User } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import RoleSwitcher from './RoleSwitcher';
@@ -10,9 +10,7 @@ const BasicPlayerNav = () => {
   const { logout } = useAuth();
 
   const tabs = [
-    { path: '/courtiq', icon: Brain, label: 'CourtIQ' },
-    { path: '/courtiq/leaderboard', icon: Trophy, label: 'דירוג' },
-    { path: '/courtiq/profile', icon: User, label: 'פרופיל' },
+    { path: '/', icon: User, label: 'פרופיל' },
   ];
 
   const currentPath = location.pathname;
@@ -42,9 +40,7 @@ const BasicPlayerNav = () => {
         <div className="bg-background/80 backdrop-blur-xl border-t border-border/50">
           <div className="flex items-center justify-around py-1 px-1 max-w-md mx-auto">
             {tabs.map((tab) => {
-              const isActive =
-                currentPath === tab.path ||
-                (tab.path === '/courtiq' && currentPath === '/');
+              const isActive = currentPath === tab.path;
 
               return (
                 <button
