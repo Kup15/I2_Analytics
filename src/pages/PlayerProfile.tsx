@@ -82,8 +82,6 @@ const PlayerProfile = () => {
 
   if (!player) return <div className="p-8 text-center text-foreground">שחקן לא נמצא</div>;
 
-  const isBasicPlan = (player as any).subscription_tier === 'basic';
-
   const totalSessions = sessions.length;
   const avgPoints = totalSessions > 0 ? (sessions.reduce((s, ses) => s + ses.points, 0) / totalSessions).toFixed(1) : '0';
   const avgAssists = totalSessions > 0 ? (sessions.reduce((s, ses) => s + ses.assists, 0) / totalSessions).toFixed(1) : '0';
@@ -117,18 +115,14 @@ const PlayerProfile = () => {
                 <Target className="ml-2 h-4 w-4" />
                 מעקב קליעות
               </Button>
-              {!isBasicPlan && (
-                <>
-                  <Button variant="outline" onClick={() => setScoutReportOpen(true)} className="text-muted-foreground">
-                    <FileText className="ml-2 h-4 w-4" />
-                    דוח סקאוט
-                  </Button>
-                  <Button onClick={() => navigate(`/player/${id}/new-game`)} className="gradient-accent text-accent-foreground">
-                    <Plus className="ml-2 h-4 w-4" />
-                    משחק חדש
-                  </Button>
-                </>
-              )}
+              <Button variant="outline" onClick={() => setScoutReportOpen(true)} className="text-muted-foreground">
+                <FileText className="ml-2 h-4 w-4" />
+                דוח סקאוט
+              </Button>
+              <Button onClick={() => navigate(`/player/${id}/new-game`)} className="gradient-accent text-accent-foreground">
+                <Plus className="ml-2 h-4 w-4" />
+                משחק חדש
+              </Button>
             </div>
           </div>
         ) : null}
@@ -161,23 +155,21 @@ const PlayerProfile = () => {
           </div>
         </div>
 
-        {!isBasicPlan && (
-          <div className="grid grid-cols-2 gap-4 mb-6 md:grid-cols-4">
-            {[
-              { label: 'סה"כ סשנים', value: totalSessions, color: 'text-foreground' },
-              { label: 'ממוצע נקודות', value: avgPoints, color: 'text-success' },
-              { label: 'ממוצע אסיסטים', value: avgAssists, color: 'text-accent' },
-              { label: 'ממוצע ריבאונדים', value: avgRebounds, color: 'text-accent' },
-            ].map((stat, i) => (
-              <div key={i} className="gradient-card rounded-xl p-4 text-center animate-fade-in" style={{ animationDelay: `${i * 80}ms` }}>
-                <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
-                <p className="text-xs text-muted-foreground">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="grid grid-cols-2 gap-4 mb-6 md:grid-cols-4">
+          {[
+            { label: 'סה"כ סשנים', value: totalSessions, color: 'text-foreground' },
+            { label: 'ממוצע נקודות', value: avgPoints, color: 'text-success' },
+            { label: 'ממוצע אסיסטים', value: avgAssists, color: 'text-accent' },
+            { label: 'ממוצע ריבאונדים', value: avgRebounds, color: 'text-accent' },
+          ].map((stat, i) => (
+            <div key={i} className="gradient-card rounded-xl p-4 text-center animate-fade-in" style={{ animationDelay: `${i * 80}ms` }}>
+              <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+              <p className="text-xs text-muted-foreground">{stat.label}</p>
+            </div>
+          ))}
+        </div>
 
-        {!isBasicPlan && sessions.length > 1 && (
+        {sessions.length > 1 && (
           <div className="grid gap-4 mb-6 md:grid-cols-2">
             <div className="gradient-card rounded-xl p-4">
               <h3 className="mb-4 text-right font-semibold text-foreground">התקדמות ציון וידאו</h3>
@@ -209,22 +201,17 @@ const PlayerProfile = () => {
           </div>
         )}
 
-        <PlayerGamesSection playerId={id} canCreate={auth.role === 'coach' && !isBasicPlan} />
+        <PlayerGamesSection playerId={id} canCreate={auth.role === 'coach'} />
 
-        {!isBasicPlan && (
-          <div className="mb-6">
-            <PlayerRatings playerId={id} isCoach={auth.role === 'coach'} />
-          </div>
-        )}
+        <div className="mb-6">
+          <PlayerRatings playerId={id} isCoach={auth.role === 'coach'} />
+        </div>
 
-        {!isBasicPlan && (
-          <div className="mb-6">
-            <TeamCoachFeedbackSection playerId={id} isPlayer={auth.role === 'player'} />
-          </div>
-        )}
+        <div className="mb-6">
+          <TeamCoachFeedbackSection playerId={id} isPlayer={auth.role === 'player'} />
+        </div>
 
-        {!isBasicPlan && (
-          <div className="gradient-card rounded-xl p-4">
+        <div className="gradient-card rounded-xl p-4">
             {sessions.filter(s => (s as any).status === 'open').length > 0 && (
               <div className="mb-4">
                 <h3 className="mb-3 text-right font-semibold text-accent flex items-center gap-2 justify-end">
@@ -280,8 +267,7 @@ const PlayerProfile = () => {
                 ))
               )}
             </div>
-          </div>
-        )}
+        </div>
 
         {auth.role === 'player' && (
           <div className="mt-6 text-center">
@@ -292,7 +278,7 @@ const PlayerProfile = () => {
           </div>
         )}
 
-        {auth.role === 'coach' && !isBasicPlan && (
+        {auth.role === 'coach' && (
           <ScoutReportDialog
             open={scoutReportOpen}
             onOpenChange={setScoutReportOpen}
