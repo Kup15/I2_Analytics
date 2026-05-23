@@ -252,36 +252,51 @@ const GameTaggingPage = () => {
                     </span>
                   </div>
                   <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-                    {items.map(t => (
-                      <button
-                        key={t.value}
-                        onClick={() => handleTag(t.value)}
-                        onContextMenu={(e) => { e.preventDefault(); setPendingType(t.value); }}
-                        className={`rounded-xl ${meta.buttonClass} px-2 py-3 text-white text-center active:scale-95 transition-transform`}
-                        title={t.description}
-                      >
-                        <div className="text-base font-black leading-tight">{t.code}</div>
-                        <div className="mt-1 text-[10px] leading-tight opacity-85 line-clamp-2 min-h-[2.2em]">
-                          {t.description.split(' — ')[0]}
-                        </div>
-                      </button>
-                    ))}
+                    {items.map(t => {
+                      const isPending = pendingType === t.value;
+                      return (
+                        <button
+                          key={t.value}
+                          onClick={() => setPendingType(isPending ? null : t.value)}
+                          className={`rounded-xl ${meta.buttonClass} px-2 py-3 text-white text-center active:scale-95 transition-transform ${
+                            isPending ? 'ring-2 ring-white ring-offset-2 ring-offset-card' : ''
+                          }`}
+                          title={t.description}
+                        >
+                          <div className="text-base font-black leading-tight">{t.code}</div>
+                          <div className="mt-1 text-[10px] leading-tight opacity-85 line-clamp-2 min-h-[2.2em]">
+                            {t.description.split(' — ')[0]}
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               );
             })}
 
             {pendingType && (
-              <div className="flex flex-wrap items-center gap-2 rounded-lg bg-secondary p-2">
-                <span className="text-xs text-muted-foreground">
-                  ציון ל"{TAG_TYPES_BY_VALUE[pendingType]?.code}":
+              <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-secondary p-3">
+                <span className="text-sm text-muted-foreground">
+                  איך היה ה־"{TAG_TYPES_BY_VALUE[pendingType]?.code}"?
                 </span>
-                {[-2, -1, 0, 1, 2].map(s => (
-                  <Button key={s} size="sm" variant="outline" onClick={() => handleTag(pendingType, s)}>
-                    {s > 0 ? `+${s}` : s}
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => handleTag(pendingType, 1)}
+                    className="bg-emerald-600 text-white hover:bg-emerald-500"
+                  >
+                    טוב +1
                   </Button>
-                ))}
-                <Button size="sm" variant="ghost" onClick={() => setPendingType(null)}>בטל</Button>
+                  <Button
+                    size="sm"
+                    onClick={() => handleTag(pendingType, -1)}
+                    className="bg-red-600 text-white hover:bg-red-500"
+                  >
+                    רע -1
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setPendingType(null)}>בטל</Button>
+                </div>
               </div>
             )}
             {tags.length > 0 && (

@@ -24,7 +24,7 @@
     --muted: 222 25% 13%;
     --muted-foreground: 215 15% 50%;
 
-    --accent: 24 100% 50%;
+    --accent: 196 100% 50%;
     --accent-foreground: 222 47% 6%;
 
     --destructive: 0 72% 51%;
@@ -32,18 +32,18 @@
 
     --border: 222 20% 16%;
     --input: 222 20% 16%;
-    --ring: 24 100% 50%;
+    --ring: 196 100% 50%;
 
     --radius: 0.875rem;
 
     --sidebar-background: 222 40% 8%;
     --sidebar-foreground: 210 20% 85%;
-    --sidebar-primary: 24 100% 50%;
+    --sidebar-primary: 196 100% 50%;
     --sidebar-primary-foreground: 222 47% 6%;
     --sidebar-accent: 222 30% 14%;
     --sidebar-accent-foreground: 210 20% 85%;
     --sidebar-border: 222 20% 16%;
-    --sidebar-ring: 24 100% 50%;
+    --sidebar-ring: 196 100% 50%;
 
     --success: 152 69% 40%;
     --success-foreground: 222 47% 6%;
@@ -65,9 +65,9 @@
 
   body {
     @apply bg-background text-foreground font-heebo;
-    background-image: 
-      radial-gradient(ellipse 80% 50% at 50% -20%, hsl(24 100% 50% / 0.04), transparent),
-      radial-gradient(ellipse 60% 40% at 80% 100%, hsl(222 55% 22% / 0.08), transparent);
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, hsl(196 100% 50% / 0.05), transparent),
+      radial-gradient(ellipse 60% 40% at 80% 100%, hsl(210 80% 20% / 0.08), transparent);
     background-attachment: fixed;
   }
 }
@@ -80,8 +80,8 @@
   }
   
   .gradient-accent {
-    background: linear-gradient(135deg, hsl(24 100% 52%), hsl(16 95% 42%));
-    box-shadow: 0 4px 16px -4px hsl(24 100% 50% / 0.35);
+    background: linear-gradient(135deg, hsl(196 100% 52%), hsl(210 100% 40%));
+    box-shadow: 0 4px 16px -4px hsl(196 100% 50% / 0.35);
   }
 
   .gradient-primary {
@@ -108,8 +108,8 @@
   }
 
   .stat-glow {
-    box-shadow: 
-      0 0 24px -6px hsl(24 100% 50% / 0.25),
+    box-shadow:
+      0 0 24px -6px hsl(196 100% 50% / 0.25),
       inset 0 1px 0 hsl(0 0% 100% / 0.03);
   }
 
@@ -130,7 +130,7 @@
   }
 
   .text-glow {
-    text-shadow: 0 0 20px hsl(24 100% 50% / 0.3);
+    text-shadow: 0 0 20px hsl(196 100% 50% / 0.3);
   }
 }
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Plus, Target, FileText, Clock } from 'lucide-react';
+import { ArrowRight, Plus, FileText, Clock } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import PlayerRatings from '@/components/PlayerRatings';
 import TeamCoachFeedbackSection from '@/components/TeamCoachFeedbackSection';
@@ -111,10 +111,6 @@ const PlayerProfile = () => {
             </Button>
 
             <div className="flex gap-2 flex-wrap justify-end">
-              <Button variant="outline" onClick={() => navigate(`/player/${id}/shots`)} className="text-muted-foreground">
-                <Target className="ml-2 h-4 w-4" />
-                מעקב קליעות
-              </Button>
               <Button variant="outline" onClick={() => setScoutReportOpen(true)} className="text-muted-foreground">
                 <FileText className="ml-2 h-4 w-4" />
                 דוח סקאוט

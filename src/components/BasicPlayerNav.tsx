@@ -50,7 +50,7 @@ const BasicPlayerNav = () => {
                     isActive ? 'text-accent' : 'text-muted-foreground'
                   }`}
                 >
-                  <tab.icon className={`h-5 w-5 ${isActive ? 'drop-shadow-[0_0_8px_hsl(24,100%,50%,0.5)]' : ''}`} />
+                  <tab.icon className={`h-5 w-5 ${isActive ? 'drop-shadow-[0_0_8px_hsl(196,100%,50%,0.5)]' : ''}`} />
                   <span className="text-[10px] font-semibold leading-none">{tab.label}</span>
                   {isActive && <div className="h-0.5 w-5 rounded-full gradient-accent mt-0.5" />}
                 </button>

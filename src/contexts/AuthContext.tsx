@@ -8,7 +8,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   role: UserRole | null;
-  profile: { display_name: string; team?: string; position?: string; age?: number; is_approved?: boolean; subscription_tier?: string; payment_status?: string } | null;
+  profile: { display_name: string; team?: string; position?: string; age?: number; is_approved?: boolean; courtiq_enabled?: boolean; subscription_tier?: string; payment_status?: string } | null;
   isApproved: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ error?: string }>;
@@ -32,19 +32,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
       .from('profiles')
-      .select('display_name, role, team, position, age, is_approved, subscription_tier, payment_status')
+      .select('display_name, role, team, position, age, is_approved, courtiq_enabled, subscription_tier, payment_status')
       .eq('user_id', userId)
       .single();
     if (data) {
-      setRole(data.role as UserRole);
-      // DEV: skip approval gate locally
-      setIsApproved(import.meta.env.DEV ? true : (data.is_approved ?? false));
+      const roleValue = data.role as UserRole;
+      setRole(roleValue);
+      const approved = data.is_approved ?? false;
+      // Players also need explicit courtiq access — flipped on by the
+      // create-player edge function when a coach adds them here.
+      const courtiqEnabled = (data as { courtiq_enabled?: boolean }).courtiq_enabled ?? false;
+      const playerAllowed = roleValue === 'coach' ? approved : approved && courtiqEnabled;
+      // DEV: skip both gates locally so the dev DB stays usable
+      setIsApproved(import.meta.env.DEV ? true : playerAllowed);
       setProfile({
         display_name: data.display_name,
         team: data.team ?? undefined,
         position: data.position ?? undefined,
         age: data.age ?? undefined,
-        is_approved: data.is_approved ?? false,
+        is_approved: approved,
+        courtiq_enabled: courtiqEnabled,
         subscription_tier: (data as any).subscription_tier ?? 'basic',
         payment_status: (data as any).payment_status ?? 'pending',
       });

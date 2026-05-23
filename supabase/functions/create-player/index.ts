@@ -62,11 +62,14 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: createError.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Update the profile with additional fields
+    // Update the profile with additional fields and grant courtiq access.
+    // courtiq_enabled defaults to false in the DB so players created in the
+    // sibling shooting-coach app cannot log in here — this is the one place
+    // that flips it on.
     if (newUser?.user) {
       await adminClient
         .from("profiles")
-        .update({ team, position, age: age ? parseInt(age) : null, is_approved: true })
+        .update({ team, position, age: age ? parseInt(age) : null, is_approved: true, courtiq_enabled: true })
         .eq("user_id", newUser.user.id);
     }
 

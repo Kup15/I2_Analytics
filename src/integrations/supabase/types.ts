@@ -689,6 +689,7 @@ export type Database = {
           age_category: string | null
           avatar_url: string | null
           coach_id: string | null
+          courtiq_enabled: boolean
           created_at: string
           display_name: string
           id: string
@@ -710,6 +711,7 @@ export type Database = {
           age_category?: string | null
           avatar_url?: string | null
           coach_id?: string | null
+          courtiq_enabled?: boolean
           created_at?: string
           display_name: string
           id?: string
@@ -731,6 +733,7 @@ export type Database = {
           age_category?: string | null
           avatar_url?: string | null
           coach_id?: string | null
+          courtiq_enabled?: boolean
           created_at?: string
           display_name?: string
           id?: string

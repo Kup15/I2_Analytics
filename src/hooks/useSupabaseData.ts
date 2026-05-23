@@ -56,6 +56,7 @@ export function usePlayers() {
       .select('*')
       .eq('role', 'player')
       .eq('is_approved', true)
+      .eq('courtiq_enabled', true)
       .order('display_name');
     if (data) setPlayers(data as unknown as PlayerProfile[]);
     setLoading(false);
