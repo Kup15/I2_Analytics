@@ -1101,6 +1101,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      enable_player_courtiq: { Args: { target_user_id: string }; Returns: undefined }
       get_active_courtiq_questions: { Args: never; Returns: Json }
       get_courtiq_leaderboard: { Args: { _period: string }; Returns: Json }
       has_role: {

@@ -27,9 +27,11 @@ const AppRoutes = () => {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl gradient-accent animate-pulse">
-            <span className="text-2xl font-black text-accent-foreground">I2</span>
-          </div>
+          <img
+            src="/logo.png"
+            alt="I2 Analytics"
+            className="mx-auto mb-4 h-20 w-20 rounded-2xl object-cover animate-pulse shadow-lg"
+          />
           <p className="text-muted-foreground">טוען...</p>
         </div>
       </div>

@@ -10,11 +10,11 @@ const MobileTopBar = () => {
 
   return (
     <div className="fixed top-0 left-0 right-0 z-40 safe-area-top">
-      <div className="h-11 gradient-accent flex items-center justify-center relative">
-        <span className="text-[13px] font-black text-accent-foreground tracking-widest">COURT IQ</span>
+      <div className="h-12 bg-background/95 backdrop-blur border-b border-border flex items-center justify-center relative">
+        <img src="/logo.png" alt="I2 Analytics" className="h-9 w-9 rounded-lg object-cover" />
         <button
           onClick={logout}
-          className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center justify-center h-8 w-8 rounded-lg text-accent-foreground/90 hover:bg-accent-foreground/10 transition-colors"
+          className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center justify-center h-8 w-8 rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
           aria-label="התנתק"
           title="התנתק"
         >

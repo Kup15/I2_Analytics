@@ -32,10 +32,7 @@ const LandingPage = () => {
           className="flex items-center justify-between px-6 py-4 md:px-12"
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent">
-              <span className="text-lg font-black text-accent-foreground">I2</span>
-            </div>
-            <span className="text-xl font-bold tracking-tight">I2 Analytics</span>
+            <img src="/logo.png" alt="I2 Analytics" className="h-12 w-12 rounded-xl object-cover" />
           </div>
           <Button
             onClick={() => setShowLogin(true)}
@@ -110,9 +107,7 @@ const LandingPage = () => {
           </a>
           <div className="flex flex-col md:flex-row items-center justify-between w-full gap-4">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
-                <span className="text-sm font-black text-accent-foreground">I2</span>
-              </div>
+              <img src="/logo.png" alt="I2 Analytics" className="h-9 w-9 rounded-lg object-cover" />
               <span className="font-bold">I2 Analytics</span>
             </div>
             <p className="text-sm text-muted-foreground">© 2026 I2 Analytics. כל הזכויות שמורות.</p>

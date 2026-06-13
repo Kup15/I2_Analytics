@@ -114,6 +114,19 @@ const AddPlayerDialog = ({ open, onOpenChange, onSaved }: Props) => {
       return;
     }
 
+    // Grant courtiq access via SQL RPC (works whether or not the deployed
+    // create-player function has been updated to flip the flag itself).
+    if (data?.userId) {
+      const { error: rpcError } = await supabase.rpc('enable_player_courtiq', {
+        target_user_id: data.userId,
+      });
+      if (rpcError) {
+        setError(`השחקן נוצר אך אין לו גישה ל-I2 Analytics: ${rpcError.message}`);
+        setIsLoading(false);
+        return;
+      }
+    }
+
     toast.success('השחקן נוסף בהצלחה!');
     resetForm();
     onOpenChange(false);
@@ -123,13 +136,13 @@ const AddPlayerDialog = ({ open, onOpenChange, onSaved }: Props) => {
 
   const handleEnable = async (player: PoolPlayer) => {
     setEnablingId(player.user_id);
-    const { data, error: fnError } = await supabase.functions.invoke('enable-player-courtiq', {
-      body: { userId: player.user_id },
+    const { error: rpcError } = await supabase.rpc('enable_player_courtiq', {
+      target_user_id: player.user_id,
     });
     setEnablingId(null);
 
-    if (fnError || data?.error) {
-      toast.error(data?.error || fnError?.message || 'שגיאה בהוספת השחקן');
+    if (rpcError) {
+      toast.error(`שגיאה בהוספת השחקן: ${rpcError.message}`);
       return;
     }
 
