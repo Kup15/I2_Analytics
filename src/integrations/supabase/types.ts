@@ -1101,6 +1101,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_player: {
+        Args: {
+          p_age?: number | null
+          p_display_name: string
+          p_email: string
+          p_password: string
+          p_position?: string | null
+          p_team?: string | null
+        }
+        Returns: string
+      }
       enable_player_courtiq: { Args: { target_user_id: string }; Returns: undefined }
       get_active_courtiq_questions: { Args: never; Returns: Json }
       get_courtiq_leaderboard: { Args: { _period: string }; Returns: Json }

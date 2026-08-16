@@ -97,42 +97,23 @@ const AddPlayerDialog = ({ open, onOpenChange, onSaved }: Props) => {
     setIsLoading(true);
     setError('');
 
-    const { data, error: fnError } = await supabase.functions.invoke('create-player', {
-      body: {
-        email: email.trim(),
-        password,
-        displayName: displayName.trim(),
-        team: team.trim() || null,
-        position: position || null,
-        age: age || null,
-      },
+    // Creation runs as a SQL RPC rather than an edge function: this project's
+    // Supabase lives in a Lovable account we can't deploy functions to, so the
+    // deployed create-player is permanently stale. The RPC also grants I2
+    // Analytics access itself, so no follow-up call is needed.
+    const { error: rpcError } = await supabase.rpc('create_player', {
+      p_email: email.trim(),
+      p_password: password,
+      p_display_name: displayName.trim(),
+      p_team: team.trim() || null,
+      p_position: position || null,
+      p_age: ageNum,
     });
 
-    if (fnError || data?.error) {
-      // supabase-js drops the response body on non-2xx and reports only
-      // "Edge Function returned a non-2xx status code" — dig the real message out.
-      let message = data?.error || fnError?.message || 'שגיאה ביצירת השחקן';
-      const res = (fnError as { context?: Response })?.context;
-      if (res && typeof res.clone === 'function') {
-        const body = await res.clone().json().catch(() => null);
-        if (body?.error) message = `${body.error} (${res.status})`;
-      }
-      setError(message);
+    if (rpcError) {
+      setError(rpcError.message || 'שגיאה ביצירת השחקן');
       setIsLoading(false);
       return;
-    }
-
-    // Grant courtiq access via SQL RPC (works whether or not the deployed
-    // create-player function has been updated to flip the flag itself).
-    if (data?.userId) {
-      const { error: rpcError } = await supabase.rpc('enable_player_courtiq', {
-        target_user_id: data.userId,
-      });
-      if (rpcError) {
-        setError(`השחקן נוצר אך אין לו גישה ל-I2 Analytics: ${rpcError.message}`);
-        setIsLoading(false);
-        return;
-      }
     }
 
     toast.success('השחקן נוסף בהצלחה!');
