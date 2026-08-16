@@ -109,7 +109,15 @@ const AddPlayerDialog = ({ open, onOpenChange, onSaved }: Props) => {
     });
 
     if (fnError || data?.error) {
-      setError(data?.error || fnError?.message || 'שגיאה ביצירת השחקן');
+      // supabase-js drops the response body on non-2xx and reports only
+      // "Edge Function returned a non-2xx status code" — dig the real message out.
+      let message = data?.error || fnError?.message || 'שגיאה ביצירת השחקן';
+      const res = (fnError as { context?: Response })?.context;
+      if (res && typeof res.clone === 'function') {
+        const body = await res.clone().json().catch(() => null);
+        if (body?.error) message = `${body.error} (${res.status})`;
+      }
+      setError(message);
       setIsLoading(false);
       return;
     }
